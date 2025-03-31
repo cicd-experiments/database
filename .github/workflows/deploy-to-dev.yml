@@ -18,4 +18,5 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             docker image inspect ${{ vars.POSTGRES_IMAGE_NAME }} > /dev/null || docker pull ${{ vars.POSTGRES_IMAGE_NAME }}
-
+            docker network inspect ${{ vars.POSTGRES_NET_NAME }} > /dev/null || docker network create --driver bridge ${{ vars.POSTGRES_NET_NAME }}
+            
