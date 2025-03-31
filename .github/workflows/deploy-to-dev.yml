@@ -2,9 +2,10 @@ name: Deploy database to dev
 on: workflow_dispatch
 permissions: {}
 env:
-  DATABASE_IMAGE_NAME: postgres:17.2-alpine
-  DATABASE_NET_NAME: database
-  DATABASE_CONTAINER_NAME: database
+  DATABASE_IMAGE: postgres:17.2-alpine
+  DATABASE_NET: database
+  DATABASE_CONTAINER: database
+  DATABASE_NAME: cicd
 jobs:
   Run_container:
     permissions:
@@ -21,9 +22,12 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            docker image inspect ${{ env.DATABASE_IMAGE_NAME }} &> /dev/null || docker pull ${{ env.DATABASE_IMAGE_NAME }}
-            docker network inspect ${{ env.DATABASE_NET_NAME }} &> /dev/null || docker network create --driver bridge ${{ vars.POSTGRES_NET_NAME }}
-            docker container inspect ${{ env.DATABASE_CONTAINER_NAME }} &> /dev/null && docker stop ${{ env.DATABASE_CONTAINER_NAME }}
-            docker container inspect ${{ env.DATABASE_CONTAINER_NAME }} &> /dev/null || docker run --rm -dit -p 5432:5432 --network ${{ vars.POSTGRES_NET_NAME }} --name ${{ env.DATABASE_CONTAINER_NAME }} -e POSTGRES_USER=user -e POSTGRES_PASSWORD=pass \
-              ${{ env.DATABASE_IMAGE_NAME }}
+            docker image inspect ${{ env.DATABASE_IMAGE }} &> /dev/null || docker pull ${{ env.DATABASE_IMAGE }}
+            docker network inspect ${{ env.DATABASE_NET }} &> /dev/null || docker network create --driver bridge ${{ vars.POSTGRES_NET_NAME }}
+            docker container inspect ${{ env.DATABASE_CONTAINER }} &> /dev/null && docker stop ${{ env.DATABASE_CONTAINER }}
+            docker container inspect ${{ env.DATABASE_CONTAINER }} &> /dev/null || docker run --rm -dit -p 5432:5432 --network ${{ vars.POSTGRES_NET_NAME }} --name ${{ env.DATABASE_CONTAINER }} \
+              -e POSTGRES_USER=${{ secrets.DATABASE_USER }} \
+              -e POSTGRES_PASSWORD=${{ secrets.DATABASE_PASS }} \
+              -e POSTGRES_DB=${{ env.DATABASE_NAME }} \
+              ${{ env.DATABASE_IMAGE }}
 
