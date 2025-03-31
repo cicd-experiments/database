@@ -24,5 +24,6 @@ jobs:
             docker image inspect ${{ env.DATABASE_IMAGE_NAME }} &> /dev/null || docker pull ${{ env.DATABASE_IMAGE_NAME }}
             docker network inspect ${{ env.DATABASE_NET_NAME }} &> /dev/null || docker network create --driver bridge ${{ vars.POSTGRES_NET_NAME }}
             docker container inspect ${{ env.DATABASE_CONTAINER_NAME }} &> /dev/null && docker stop ${{ env.DATABASE_CONTAINER_NAME }}
-            docker container inspect ${{ env.DATABASE_CONTAINER_NAME }} &> /dev/null || docker run --rm -dit -p 5432:5432 --network ${{ vars.POSTGRES_NET_NAME }} --name ${{ env.DATABASE_CONTAINER_NAME }} -e POSTGRES_USER=user -e POSTGRES_PASSWORD=pass ${{ env.DATABASE_IMAGE_NAME }}
+            docker container inspect ${{ env.DATABASE_CONTAINER_NAME }} &> /dev/null || docker run --rm -dit -p 5432:5432 --network ${{ vars.POSTGRES_NET_NAME }} --name ${{ env.DATABASE_CONTAINER_NAME }} -e POSTGRES_USER=user -e POSTGRES_PASSWORD=pass \
+              ${{ env.DATABASE_IMAGE_NAME }}
 
