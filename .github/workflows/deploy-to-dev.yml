@@ -2,8 +2,7 @@ name: Deploy database to dev
 on: workflow_dispatch
 permissions: {}
 env:
-#  DATABASE_IMAGE_NAME: postgres:17.2-alpine
-  DATABASE_IMAGE_NAME: postgres:latest
+  DATABASE_IMAGE_NAME: postgres:17.2-alpine
 jobs:
   Run_container:
     permissions:
