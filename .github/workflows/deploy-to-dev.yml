@@ -19,5 +19,5 @@ jobs:
           script: |
             docker image inspect ${{ vars.POSTGRES_IMAGE_NAME }} > /dev/null || docker pull ${{ vars.POSTGRES_IMAGE_NAME }}
             docker network inspect ${{ vars.POSTGRES_NET_NAME }} > /dev/null || docker network create --driver bridge ${{ vars.POSTGRES_NET_NAME }}
-            docker inspect db > /dev/null && echo lkj
+            docker inspect db 2> /dev/null && echo lkj
             
