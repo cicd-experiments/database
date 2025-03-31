@@ -4,6 +4,7 @@ permissions: {}
 env:
   DATABASE_IMAGE_NAME: postgre
 #  DATABASE_IMAGE_NAME: postgres:17.2-alpine
+  DATABASE_NET_NAME: database
 jobs:
   Run_container:
     permissions:
@@ -22,7 +23,7 @@ jobs:
           script: |
             docker image inspect ${{ env.DATABASE_IMAGE_NAME }} &> /dev/null || echo "pulling image..."
 #            docker image inspect ${{ env.DATABASE_IMAGE_NAME }} &> /dev/null || docker pull ${{ env.DATABASE_IMAGE_NAME }}
-            docker network inspect ${{ vars.POSTGRES_NET_NAME }} &> /dev/null || echo "creating network..."
+            docker network inspect ${{ env.DATABASE_NET_NAME }} &> /dev/null || echo "creating network..."
 #            docker network inspect ${{ vars.POSTGRES_NET_NAME }} &> /dev/null || docker network create --driver bridge ${{ vars.POSTGRES_NET_NAME }}
 #            docker inspect db &> /dev/null && docker run --rm -dit -p 5432:5432 --network ${{ vars.POSTGRES_NET_NAME }} --name db postgres:17.2-alpine
             
