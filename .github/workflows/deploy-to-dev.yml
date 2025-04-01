@@ -1,4 +1,4 @@
-name: Deploy database to dev
+name: Deploy database to the development stand
 on: workflow_dispatch
 permissions: {}
 env:
