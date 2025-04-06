@@ -1,0 +1,31 @@
+services:
+
+  database:
+    image: postgres:17.2-alpine
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Moscow
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - database_volume:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U keycloak_db_user -d keycloak_db
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - database_net
+
+database_net:
+  driver: bridge
+  name: database_net
+
+volumes:
+  database_volume:
+    driver: local
+    name: database_volume

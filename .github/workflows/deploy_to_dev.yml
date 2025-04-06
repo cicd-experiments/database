@@ -1,0 +1,30 @@
+name: Deploy database to the development stand
+on: workflow_dispatch
+permissions: {}
+jobs:
+  Run_container:
+    permissions:
+      contents: read
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Create .env file
+        run: |
+          echo "Generating .env file"
+          echo "#Authogenerated keycloak.env file" > .env
+          echo "POSTGRES_DB=${{ secrets.DATABASE_NAME }}" >> .env
+          echo "POSTGRES_USER=${{ secrets.DATABASE_USER }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.DATABASE_PASS }}" >> .env
+          echo "#EOF" >> .env
+          cat .env
+
+#      - name: Run start database script
+#        uses: appleboy/ssh-action@v1
+#        with:
+#          host: ${{ secrets.SSH_HOST }}
+#          username: ${{ secrets.SSH_USER }}
+#          key: ${{ secrets.SSH_PRIVATE_KEY }}
+#          port: ${{ secrets.SSH_PORT }}
+#          script: |
+
