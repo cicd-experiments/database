@@ -1,30 +1,44 @@
 name: Deploy database to the development stand
 on: workflow_dispatch
 permissions: {}
+env:
+  DATABASE_ENV_FILENAME: database.env
+  DB-CLIENT_ENV_FILENAME: db-client.env
+  COMPOSE_FILENAME: compose.yml
 jobs:
-  Run_container:
+  deploy_database:
+    environment: develop
     permissions:
       contents: read
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Create .env file
+      - name: Create database.env file
         run: |
-          echo "Generating .env file"
-          echo "#Authogenerated keycloak.env file" > .env
-          echo "POSTGRES_DB=${{ secrets.DATABASE_NAME }}" >> .env
-          echo "POSTGRES_USER=${{ secrets.DATABASE_USER }}" >> .env
-          echo "POSTGRES_PASSWORD=${{ secrets.DATABASE_PASS }}" >> .env
-          echo "#EOF" >> .env
-          cat .env
-
-#      - name: Run start database script
-#        uses: appleboy/ssh-action@v1
-#        with:
-#          host: ${{ secrets.SSH_HOST }}
-#          username: ${{ secrets.SSH_USER }}
-#          key: ${{ secrets.SSH_PRIVATE_KEY }}
-#          port: ${{ secrets.SSH_PORT }}
-#          script: |
-
+          echo "POSTGRES_DB=${{ secrets.DATABASE_NAME }}" > ${{ env.DATABASE_ENV_FILENAME }}
+          echo "POSTGRES_USER=${{ secrets.DATABASE_USER }}" >> ${{ env.DATABASE_ENV_FILENAME }}
+          echo "POSTGRES_PASSWORD=${{ secrets.DATABASE_PASS }}" >> ${{ env.DATABASE_ENV_FILENAME }}
+      - name: Create db-client.env file
+        run: |
+          echo "PGADMIN_DEFAULT_EMAIL=${{ secrets.PGADMIN_DEFAULT_EMAIL }}" > ${{ env.DB-CLIENT_ENV_FILENAME }}
+          echo "PGADMIN_DEFAULT_PASSWORD=${{ secrets.PGADMIN_DEFAULT_PASSWORD }}" >> ${{ env.DB-CLIENT_ENV_FILENAME }}
+      - name: Copy file via ssh password
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "${{ env.DATABASE_ENV_FILENAME }},${{ env.DB-CLIENT_ENV_FILENAME }},${{ env.COMPOSE_FILENAME }}"
+          target: ${{ vars.DATABASE_DIRECTORY }}
+      - name: Compose up
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ${{ vars.DATABASE_DIRECTORY }}
+            docker compose --env-file ${{ env.DATABASE_ENV_FILENAME }} up -d
