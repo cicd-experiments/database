@@ -2,8 +2,7 @@ name: Deploy database to the development stand
 on: workflow_dispatch
 permissions: {}
 env:
-  DATABASE_ENV_FILENAME: database.env
-  DB-CLIENT_ENV_FILENAME: db-client.env
+  ENV_FILENAME: .env
   COMPOSE_FILENAME: compose.yml
 jobs:
   deploy_database:
@@ -14,23 +13,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Create database.env file
+      - name: Create .env file
         run: |
-          echo "POSTGRES_DB=${{ vars.IAM_DB_NAME }}" > ${{ env.DATABASE_ENV_FILENAME }}
-          echo "POSTGRES_USER=${{ secrets.IAM_DB_USER }}" >> ${{ env.DATABASE_ENV_FILENAME }}
-          echo "POSTGRES_PASSWORD=${{ secrets.IAM_DB_PASS }}" >> ${{ env.DATABASE_ENV_FILENAME }}
-      - name: Create db-client.env file
-        run: |
-          echo "PGADMIN_DEFAULT_EMAIL=${{ secrets.PGADMIN_DEFAULT_EMAIL }}" > ${{ env.DB-CLIENT_ENV_FILENAME }}
-          echo "PGADMIN_DEFAULT_PASSWORD=${{ secrets.PGADMIN_DEFAULT_PASSWORD }}" >> ${{ env.DB-CLIENT_ENV_FILENAME }}
-      - name: Copy file via ssh password
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> ${{ env.ENV_FILENAME }}
+          echo "PGADMIN_DEFAULT_EMAIL=${{ secrets.PGADMIN_DEFAULT_EMAIL }}" > ${{ env.ENV_FILENAME }}
+          echo "PGADMIN_DEFAULT_PASSWORD=${{ secrets.PGADMIN_DEFAULT_PASSWORD }}" >> ${{ env.ENV_FILENAME }}
+      - name: Copy files via ssh password
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "${{ env.DATABASE_ENV_FILENAME }},${{ env.DB-CLIENT_ENV_FILENAME }},${{ env.COMPOSE_FILENAME }}"
+          source: "${{ env.ENV_FILENAME }},${{ env.COMPOSE_FILENAME }}"
           target: ${{ vars.PROJECT_DIR }}
       - name: Compose up
         uses: appleboy/ssh-action@v1
@@ -41,4 +36,4 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd ${{ vars.PROJECT_DIR }}
-            docker compose --env-file ${{ env.DATABASE_ENV_FILENAME }} up -d
+            docker compose --env-file ${{ env.ENV_FILENAME }} up -d
