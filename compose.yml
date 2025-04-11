@@ -21,7 +21,7 @@ services:
 
   db-client:
     image: dpage/pgadmin4:9.2
-    container_name: pgadmin
+    container_name: db-client
     restart: unless-stopped
     environment:
       TZ: Europe/Moscow
